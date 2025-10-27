@@ -27,19 +27,18 @@ const customUrl = document.getElementById('customUrl');
 const btnLoad = document.getElementById('btnLoad');
 
 // Init player
-// Init player
-window.addEventListener("load", () => {
-  // čekamo da se hls.js učita
-  const start = () => setStream(DEFAULT_STREAM, "Zadani stream");
-  if (window.Hls) start();
-  else {
-    const iv = setInterval(() => {
-      if (window.Hls) {
-        clearInterval(iv);
-        start();
-      }
-    }, 200);
-  }
+// Init player – čekaj da DOM i hls.js budu spremni
+window.addEventListener("DOMContentLoaded", () => {
+  const startWhenReady = () => {
+    const audioEl = document.getElementById("audio");
+    if (audioEl && window.Hls) {
+      setStream(DEFAULT_STREAM, "Zadani stream");
+    } else {
+      // pokušavaj svakih 200 ms dok sve ne bude spremno
+      setTimeout(startWhenReady, 200);
+    }
+  };
+  startWhenReady();
 });
 
 
