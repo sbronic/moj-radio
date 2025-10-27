@@ -4,7 +4,7 @@ const API_BASES = [
   "https://de1.api.radio-browser.info",
   "https://fr1.api.radio-browser.info",
   "https://nl1.api.radio-browser.info",
-  "https://corsproxy.io/?"
+  "https://corsproxy.io/?";
 
 ];
 
