@@ -1,5 +1,5 @@
 // Config
-const DEFAULT_STREAM = "https://dygedge.radyotvonline.net/radyovoyage/playlist.m3u8"; // Radio Voyage
+const DEFAULT_STREAM = "https://moj-radio.vercel.app/api/proxy?url=https://dygedge.radyotvonline.net/radyovoyage/playlist.m3u8";
 const API_BASES = [
   "https://de1.api.radio-browser.info",
   "https://fr1.api.radio-browser.info",
