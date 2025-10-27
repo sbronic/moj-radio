@@ -56,11 +56,28 @@ btnClearFavs.addEventListener('click', () => {
 // --------------------------------------------------
 
 function setStream(url, title, stationObj) {
-  audio.src = url;
-  npTitle.textContent = title || 'Nepoznato';
+   npTitle.textContent = title || 'Nepoznato';
   npUrl.textContent = url;
+
+  if (audio.canPlayType('application/vnd.apple.mpegurl')) {
+    // Safari, iOS nativno podržava HLS
+    audio.src = url;
+  } else if (Hls.isSupported()) {
+    // Ostali browseri koriste hls.js
+    if (window.hls) {
+      window.hls.destroy();
+    }
+    window.hls = new Hls();
+    window.hls.loadSource(url);
+    window.hls.attachMedia(audio);
+  } else {
+    console.warn('HLS nije podržan');
+    audio.src = url;
+  }
+
   audio.load();
   updateFavButton(url);
+
   if (stationObj) {
     localStorage.setItem('mojiradio:last', JSON.stringify(stationObj));
   } else {
