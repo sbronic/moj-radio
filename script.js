@@ -75,15 +75,22 @@ function setStream(url, title, stationObj) {
   npTitle.textContent = title || 'Nepoznato';
   npUrl.textContent = url;
 
+  // Ako URL nije već proxy, omotaj ga
+  let streamUrl = url;
+  if (!url.startsWith("https://moj-radio.vercel.app/api/proxy?")) {
+    streamUrl = "https://moj-radio.vercel.app/api/proxy?url=" + encodeURIComponent(url);
+  }
+
+  // HLS ili obični stream
   if (audio.canPlayType('application/vnd.apple.mpegurl')) {
-    audio.src = url;
+    audio.src = streamUrl;
   } else if (window.Hls && Hls.isSupported()) {
     if (window.hls) window.hls.destroy();
     window.hls = new Hls();
-    window.hls.loadSource(url);
+    window.hls.loadSource(streamUrl);
     window.hls.attachMedia(audio);
   } else {
-    audio.src = url;
+    audio.src = streamUrl;
   }
 
   audio.load();
@@ -95,6 +102,7 @@ function setStream(url, title, stationObj) {
     localStorage.setItem('mojiradio:last', JSON.stringify({ name: title, urlResolved: url }));
   }
 }
+
 
 // --------------------------------------------------
 // RADIO-BROWSER SEARCH
