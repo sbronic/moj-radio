@@ -76,27 +76,31 @@ function getApiBase() {
 
 async function searchStations() {
   const base = getApiBase();
-  const params = new URLSearchParams();
-  params.set('limit', '50');
-  params.set('hidebroken', 'true');
-  if (qName.value.trim()) params.set('name', qName.value.trim());
-  if (qCountry.value.trim()) params.set('country', qCountry.value.trim());
-  if (qTag.value.trim()) params.set('tag', qTag.value.trim());
-  const url = `${base}/json/stations/search?${params.toString()}`;
+const params = new URLSearchParams();
+params.set('limit', '50');
+params.set('hidebroken', 'true');
+if (qName.value.trim()) params.set('name', qName.value.trim());
+if (qCountry.value.trim()) params.set('country', qCountry.value.trim());
+if (qTag.value.trim()) params.set('tag', qTag.value.trim());
 
-  resultsEl.innerHTML = '<li>Tražim…</li>';
-  try {
-    const res = await fetch(url, { headers: { 'User-Agent': 'MojIRadio/1.0' } });
-    const data = await res.json();
-    if (!Array.isArray(data) || data.length === 0) {
-      resultsEl.innerHTML = '<li>Nema rezultata.</li>';
-      return;
-    }
-    renderResults(data);
-  } catch (e) {
-    console.error(e);
-    resultsEl.innerHTML = '<li>Pogreška pri dohvaćanju. Pokušaj ponovno.</li>';
+// KROZ PROXY radi CORS-a
+const apiUrl = `${base}/json/stations/search?${params.toString()}`;
+const url = CORS_PROXY + encodeURIComponent(apiUrl);
+
+resultsEl.innerHTML = '<li>Tražim…</li>';
+try {
+  const res = await fetch(url);
+  const data = await res.json();
+  if (!Array.isArray(data) || data.length === 0) {
+    resultsEl.innerHTML = '<li>Nema rezultata.</li>';
+    return;
   }
+  renderResults(data);
+} catch (e) {
+  console.error(e);
+  resultsEl.innerHTML = '<li>Pogreška pri dohvaćanju. Pokušaj ponovno.</li>';
+}
+
 }
 
 function renderResults(stations) {
