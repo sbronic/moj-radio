@@ -85,8 +85,46 @@
   </main>
 
   <footer>
-    <small>Moj IRADIO • PWA • Sinišin Radio Browser APP</small>
-  </footer>
+  <small>Moj IRADIO • PWA • Sinišin Radio Browser API</small>
+  <button id="helpBtn" style="margin-left:8px">📘 Upute</button>
+</footer>
+
+<!-- Upute modal -->
+<div id="helpModal" class="help-modal" hidden>
+  <div class="help-sheet">
+    <div class="help-header">
+      <h2>Upute za korištenje</h2>
+      <button id="helpClose" aria-label="Zatvori">✖</button>
+    </div>
+    <div class="help-content">
+      <h3>Pokretanje i instalacija</h3>
+      <p>Otvorite https://moj-radio.vercel.app u pregledniku.</p>
+      <p>Na Androidu u Chromeu odaberite Dodaj na početni zaslon.</p>
+      <p>Na iPhoneu u Safariju dodirnite Dijeli pa Add to Home Screen.</p>
+      <h3>Reprodukcija</h3>
+      <p>Kliknite Play ispod playera za početak reprodukcije.</p>
+      <p>Ako se pojavi poruka Klikni tipku Play za početak reprodukcije, to je sigurnosno pravilo preglednika i traži ručni klik.</p>
+      <h3>Vlastiti stream</h3>
+      <p>U Unesi URL streama zalijepite link stanice i kliknite Učitaj.</p>
+      <p>HTTPS linkovi rade odmah, HTTP linkovi idu kroz proxy.</p>
+      <h3>Pretraga stanica</h3>
+      <p>Pretražujte po nazivu, zemlji ili žanru i pritisnite Traži.</p>
+      <p>Na rezultatu koristite Play ili Spremi za favorite.</p>
+      <h3>Favoriti</h3>
+      <p>U Favoritima uz svaku stanicu imate Play, Preimenuj i Ukloni.</p>
+      <p>Obriši favorite briše sve favorite uz dvostruku potvrdu.</p>
+      <h3>Backup i prijenos</h3>
+      <p>Spremi backup preuzima mojiradio-favoriti.json na uređaj.</p>
+      <p>Učitaj backup vraća favorite iz odabrane .json datoteke.</p>
+      <h3>Ažuriranje aplikacije</h3>
+      <p>Aplikacija se sama osvježava u pozadini nakon novog izdanja.</p>
+      <p>Za trenutno ažuriranje zatvorite i ponovno otvorite aplikaciju.</p>
+      <h3>Napomena o streamovima</h3>
+      <p>Streamovi se pokušavaju reproducirati preko sigurnog proxyja.</p>
+      <p>Neki udaljeni serveri mogu blokirati prosljeđivanje i tada stream neće svirati.</p>
+    </div>
+  </div>
+</div>
 
   <script src="script.js"></script>
 </body>
