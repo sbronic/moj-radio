@@ -54,16 +54,16 @@ btnClearFavs.addEventListener('click', () => {
 });
 
 // --------------------------------------------------
-
 function setStream(url, title, stationObj) {
-   npTitle.textContent = title || 'Nepoznato';
+  npTitle.textContent = title || 'Nepoznato';
   npUrl.textContent = url;
 
+  // HLS podrška
   if (audio.canPlayType('application/vnd.apple.mpegurl')) {
-    // Safari, iOS nativno podržava HLS
+    // Safari i iOS podržavaju HLS nativno
     audio.src = url;
-  } else if (Hls.isSupported()) {
-    // Ostali browseri koriste hls.js
+  } else if (window.Hls && Hls.isSupported()) {
+    // Chrome, Edge, Firefox, Android
     if (window.hls) {
       window.hls.destroy();
     }
@@ -71,7 +71,7 @@ function setStream(url, title, stationObj) {
     window.hls.loadSource(url);
     window.hls.attachMedia(audio);
   } else {
-    console.warn('HLS nije podržan');
+    console.warn('HLS nije podržan, pokušavam izravno');
     audio.src = url;
   }
 
@@ -84,6 +84,7 @@ function setStream(url, title, stationObj) {
     localStorage.setItem('mojiradio:last', JSON.stringify({ name: title, urlResolved: url }));
   }
 }
+
 
 function getApiBase() {
   const idx = Math.floor(Math.random() * API_BASES.length);
