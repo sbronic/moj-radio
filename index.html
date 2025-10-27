@@ -22,8 +22,8 @@
   <main>
     <section class="player-card">
       <div class="now-playing">
-        <div class="np-title" id="npTitle">Zadani stream</div>
-        <div class="np-url" id="npUrl">http://46.20.3.216/</div>
+        <div class="np-title" id="npTitle">Radio Voyage</div>
+        <div class="np-url" id="npUrl">https://dygedge.radyotvonline.net/radyovoyage/playlist.m3u8</div>
       </div>
       <audio id="audio" controls preload="none"></audio>
       <div class="controls">
@@ -32,6 +32,7 @@
         <button id="btnFav" title="Dodaj u favorite">☆ Spremi</button>
       </div>
     </section>
+
     <section class="manual">
       <label for="customUrl">Unesi URL streama</label>
       <div class="row">
@@ -40,25 +41,29 @@
       </div>
       <p class="hint">Napomena: ako aplikacija radi na HTTPS domeni, neki HTTP streamovi mogu biti blokirani zbog sigurnosti. Preporuka je koristiti HTTPS streamove kad je to moguće.</p>
     </section>
+
     <section class="search">
       <h2>Pretraga stanica</h2>
       <div class="row">
-        <input id="qName" placeholder="Naziv stanice npr. Jazz" />
-        <input id="qCountry" placeholder="Zemlja npr. Croatia" />
-        <input id="qTag" placeholder="Žanr npr. rock, news" />
+        <input id="qName" placeholder="Naziv stanice npr. Jazz">
+        <input id="qCountry" placeholder="Zemlja npr. Croatia">
+        <input id="qTag" placeholder="Žanr npr. rock, news">
         <button id="btnSearch">Traži</button>
       </div>
       <ul id="results" class="list"></ul>
     </section>
+
     <section class="favorites">
       <h2>Favoriti</h2>
       <ul id="favList" class="list"></ul>
       <button id="btnClearFavs" class="danger">Obriši favorite</button>
     </section>
   </main>
+
   <footer>
-    <small>MojI Radio • PWA • Radio Browser API</small>
+    <small>Moj IRadio • PWA • Sinišin Radio Browser API</small>
   </footer>
+
   <script src="script.js"></script>
 </body>
 </html>
