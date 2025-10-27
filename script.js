@@ -1,5 +1,5 @@
 // Config
-const DEFAULT_STREAM = "https://dygedge.radyotvonline.net/radyovoyage/playlist.m3u8?listenerid=29d0a6a85b59cea2ca801b70d2a3ebaf&awparams=companionAds%3Atrue"; // Radio Voyage
+const DEFAULT_STREAM = "https://dygedge.radyotvonline.net/radyovoyage/playlist.m3u8"; // Radio Voyage
 const API_BASES = [
   "https://de1.api.radio-browser.info",
   "https://fr1.api.radio-browser.info",
