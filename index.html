@@ -4,10 +4,6 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Moj IRADIO</title>
-
-  <!-- GoatCounter analitika -->
-  <script data-goatcounter="https://moj-radio.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
-
   <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#ffffff">
@@ -24,36 +20,39 @@
   <header>
     <h1>Moj IRADIO</h1>
   </header>
-
   <main>
     <section class="player-card">
       <div class="now-playing">
         <div class="np-title" id="npTitle">Radio Voyage</div>
         <div class="np-url" id="npUrl">https://dygedge.radyotvonline.net/radyovoyage/playlist.m3u8</div>
       </div>
-
+      
+      
       <video id="audio" controls preload="none" style="width:100%;max-height:60px;background:#000;" playsinline></video>
-      <p id="playHint" style="text-align:center; color:#c00; font-weight:bold; margin-top:10px;">
+       <p id="playHint" style="text-align:center; color:#c00; font-weight:bold; margin-top:10px;">
         🎵 Klikni tipku Play za početak reprodukcije 🎵
-      </p>
-      <div id="nowPlaying" class="now-playing-info"></div>
-      <div class="controls">
+       </p>
+        <div id="nowPlaying" class="now-playing-info"></div>
+        <div class="controls">
         <button id="btnPlay">Play</button>
         <button id="btnStop">Stop</button>
         <button id="btnFav" title="Dodaj u favorite">☆ Spremi</button>
       </div>
     </section>
+<section class="favorites">
+  <h2>🎧 Moji favoriti</h2>
+  <ul id="favList" class="list"></ul>
+  <div class="fav-actions">
+    <button id="btnExport">💾 Spremi backup</button>
+    <input type="file" id="importFile" accept=".json" style="display:none">
+    <button id="btnImport">📂 Učitaj backup</button>
+    <button id="btnClearFavs" class="danger">🗑️ Obriši sve</button>
+  </div>
+</section>
 
-    <section class="favorites">
-      <h2>🎧 Moji favoriti</h2>
-      <ul id="favList" class="list"></ul>
-      <div class="fav-actions">
-        <button id="btnExport">💾 Spremi backup</button>
-        <input type="file" id="importFile" accept=".json" style="display:none">
-        <button id="btnImport">📂 Učitaj backup</button>
-        <button id="btnClearFavs" class="danger">🗑️ Obriši sve</button>
-      </div>
-    </section>
+
+
+
 
     <section class="manual">
       <label for="customUrl">Unesi URL streama</label>
@@ -61,11 +60,11 @@
         <input id="customUrl" type="url" placeholder="https://example.com/stream.mp3">
         <button id="btnLoad">Učitaj</button>
       </div>
-      <p class="hint">Napomena: ako aplikacija radi na HTTPS domeni, neki HTTP streamovi mogu biti blokirani zbog sigurnosti. Preporuka je koristiti HTTPS streamove kad je to moguće.</p>
+      <p class="hint">Napomena: ako aplikacija radi na HTTPS domeni,  neki HTTP streamovi mogu biti blokirani zbog sigurnosti. Preporuka je koristiti HTTPS streamove kad je to moguće.</p>
     </section>
 
     <section class="search">
-      <h2>Pretraga stanica (ako dobijete poruku o greški, ponovo kliknite Traži)</h2>
+      <h2>Pretraga stanica  (ako dobijete poruku o greški, ponovo kliknite traži</h2>
       <div class="row">
         <input id="qName" placeholder="Naziv stanice npr. Jazz">
         <input id="qCountry" placeholder="Zemlja npr. Croatia">
@@ -80,29 +79,54 @@
       <ul id="favList" class="list"></ul>
       <button id="btnClearFavs" class="danger">Obriši favorite</button>
     </section>
-
     <button id="btnExport">Spremi favorite (backup)</button>
-    <input type="file" id="importFile" accept=".json" style="display:none">
-    <button id="btnImport">Učitaj favorite (restore)</button>
+<input type="file" id="importFile" accept=".json" style="display:none">
+<button id="btnImport">Učitaj favorite (restore)</button>
+
   </main>
 
   <footer>
-    <small>Moj IRADIO • PWA • Sinišin Radio Browser API</small>
-    <button id="helpBtn" style="margin-left:8px">📘 Upute</button>
-  </footer>
+  <small>Moj IRADIO • PWA • Sinišin Radio Browser API</small>
+  <button id="helpBtn" style="margin-left:8px">📘 Upute</button>
+</footer>
 
-  <!-- Upute modal -->
-  <div id="helpModal" class="help-modal" hidden>
-    <div class="help-sheet">
-      <div class="help-header">
-        <h2>Upute za korištenje</h2>
-        <button id="helpClose" aria-label="Zatvori">✖</button>
-      </div>
-      <div class="help-content">
-        <h3>Pokretanje i instalacija</h3>
-        <p>Otvorite https://moj-radio.vercel.app u pregledniku.</p>
-        <p>Na Androidu u Chromeu odaberite Dodaj na početni zaslon.</p>
-        <p>Na iPhoneu u Safariju dodirnite Dijeli pa Add to Home Screen.</p>
-        <h3>Reprodukcija</h3>
-        <p>Kliknite Play ispod playera za početak reprodukcije.</p>
-        <p>Ako
+<!-- Upute modal -->
+<div id="helpModal" class="help-modal" hidden>
+  <div class="help-sheet">
+    <div class="help-header">
+      <h2>Upute za korištenje</h2>
+      <button id="helpClose" aria-label="Zatvori">✖</button>
+    </div>
+    <div class="help-content">
+      <h3>Pokretanje i instalacija</h3>
+      <p>Otvorite https://moj-radio.vercel.app u pregledniku.</p>
+      <p>Na Androidu u Chromeu odaberite Dodaj na početni zaslon.</p>
+      <p>Na iPhoneu u Safariju dodirnite Dijeli pa Add to Home Screen.</p>
+      <h3>Reprodukcija</h3>
+      <p>Kliknite Play ispod playera za početak reprodukcije.</p>
+      <p>Ako se pojavi poruka Klikni tipku Play za početak reprodukcije, to je sigurnosno pravilo preglednika i traži ručni klik.</p>
+      <h3>Vlastiti stream</h3>
+      <p>U Unesi URL streama zalijepite link stanice i kliknite Učitaj.</p>
+      <p>HTTPS linkovi rade odmah, HTTP linkovi idu kroz proxy.</p>
+      <h3>Pretraga stanica</h3>
+      <p>Pretražujte po nazivu, zemlji ili žanru i pritisnite Traži.</p>
+      <p>Na rezultatu koristite Play ili Spremi za favorite.</p>
+      <h3>Favoriti</h3>
+      <p>U Favoritima uz svaku stanicu imate Play, Preimenuj i Ukloni.</p>
+      <p>Obriši favorite briše sve favorite uz dvostruku potvrdu.</p>
+      <h3>Backup i prijenos</h3>
+      <p>Spremi backup preuzima mojiradio-favoriti.json na uređaj.</p>
+      <p>Učitaj backup vraća favorite iz odabrane .json datoteke.</p>
+      <h3>Ažuriranje aplikacije</h3>
+      <p>Aplikacija se sama osvježava u pozadini nakon novog izdanja.</p>
+      <p>Za trenutno ažuriranje zatvorite i ponovno otvorite aplikaciju.</p>
+      <h3>Napomena o streamovima</h3>
+      <p>Streamovi se pokušavaju reproducirati preko sigurnog proxyja.</p>
+      <p>Neki udaljeni serveri mogu blokirati prosljeđivanje i tada stream neće svirati.</p>
+    </div>
+  </div>
+</div>
+
+  <script src="script.js"></script>
+</body>
+</html>
