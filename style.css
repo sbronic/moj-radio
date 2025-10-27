@@ -136,4 +136,6 @@ button.danger:hover {
   .help-header button{background:#181818;border-color:#2a2a2a;color:#eee}
   .help-header button:hover{background:#1f1f1f}
   .help-content p{color:#ddd}
+  /* Modal: poštuj hidden atribut */
+.help-modal[hidden]{display:none !important;}
 }
