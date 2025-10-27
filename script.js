@@ -26,50 +26,16 @@ const qTag = document.getElementById('qTag');
 const btnSearch = document.getElementById('btnSearch');
 const customUrl = document.getElementById('customUrl');
 const btnLoad = document.getElementById('btnLoad');
-const nowPlayingEl = document.getElementById('nowPlaying');
 const btnExport = document.getElementById('btnExport');
 const btnImport = document.getElementById('btnImport');
 const importFile = document.getElementById('importFile');
-
-btnExport.addEventListener('click', () => {
-  const favs = loadFavorites();
-  const blob = new Blob([JSON.stringify(favs, null, 2)], { type: 'application/json' });
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = 'mojiradio-favoriti.json';
-  a.click();
-});
-
-btnImport.addEventListener('click', () => importFile.click());
-importFile.addEventListener('change', (e) => {
-  const file = e.target.files[0];
-  if (!file) return;
-  const reader = new FileReader();
-  reader.onload = (ev) => {
-    try {
-      const favs = JSON.parse(ev.target.result);
-      if (Array.isArray(favs)) {
-        localStorage.setItem('mojiradio:favs', JSON.stringify(favs));
-        renderFavorites();
-        alert('Favoriti su uspješno učitani!');
-      } else {
-        alert('Nevažeća datoteka.');
-      }
-    } catch (err) {
-      alert('Greška pri učitavanju datoteke.');
-    }
-  };
-  reader.readAsText(file);
-});
-
 
 // --------------------------------------------------
 // INIT PLAYER
 // --------------------------------------------------
 window.addEventListener("DOMContentLoaded", () => {
   const startWhenReady = () => {
-    const audioEl = document.getElementById("audio");
-    if (audioEl && window.Hls) {
+    if (audio && window.Hls) {
       setStream(DEFAULT_STREAM, "Zadani stream");
     } else {
       setTimeout(startWhenReady, 200);
@@ -81,20 +47,17 @@ window.addEventListener("DOMContentLoaded", () => {
 btnPlay.addEventListener('click', () => { audio.play().catch(console.warn); });
 btnStop.addEventListener('click', () => { audio.pause(); audio.currentTime = 0; });
 btnFav.addEventListener('click', toggleFavorite);
-
 btnLoad.addEventListener('click', () => {
   const url = customUrl.value.trim();
   if (!url) return;
   setStream(url, "Prilagođeni stream");
 });
-
 btnSearch.addEventListener('click', searchStations);
 document.addEventListener('keydown', (e) => {
   if (e.key === 'Enter' && (document.activeElement === qName || document.activeElement === qCountry || document.activeElement === qTag)) {
     searchStations();
   }
 });
-
 btnClearFavs.addEventListener('click', () => {
   if (confirm('Jeste li sigurni da želite obrisati sve favorite?')) {
     if (confirm('Stvarno želite obrisati sve favorite? Ova radnja se ne može poništiti.')) {
@@ -112,7 +75,6 @@ function setStream(url, title, stationObj) {
   npTitle.textContent = title || 'Nepoznato';
   npUrl.textContent = url;
 
-  // HLS podrška
   if (audio.canPlayType('application/vnd.apple.mpegurl')) {
     audio.src = url;
   } else if (window.Hls && Hls.isSupported()) {
@@ -181,7 +143,7 @@ function renderResults(stations) {
     meta.className = 'meta';
     const mCountry = st.country ? `🌍 ${st.country}` : null;
     const mTags = st.tags ? `🏷️ ${st.tags}` : null;
-    const mCodec = st.codec ? `🎵 ${st.codec} ${st.bitrate ? st.bitrate+'kbps' : ''}` : null;
+    const mCodec = st.codec ? `🎵 ${st.codec} ${st.bitrate ? st.bitrate + 'kbps' : ''}` : null;
     [mCountry, mTags, mCodec].filter(Boolean).forEach(t => {
       const span = document.createElement('span');
       span.textContent = t;
@@ -198,12 +160,8 @@ function renderResults(stations) {
     btnFavItem.textContent = '☆ Spremi';
     btnFavItem.addEventListener('click', () => saveFavorite({ name: st.name, url: st.url_resolved || st.url }));
 
-    actions.appendChild(btnPlayItem);
-    actions.appendChild(btnFavItem);
-
-    li.appendChild(title);
-    li.appendChild(meta);
-    li.appendChild(actions);
+    actions.append(btnPlayItem, btnFavItem);
+    li.append(title, meta, actions);
     resultsEl.appendChild(li);
   });
 }
@@ -308,11 +266,9 @@ function renderFavorites() {
   });
 }
 
-  // === FAVORITE BACKUP / IMPORT / RENAME ===
-const btnExport = document.getElementById('btnExport');
-const btnImport = document.getElementById('btnImport');
-const importFile = document.getElementById('importFile');
-
+// --------------------------------------------------
+// BACKUP / IMPORT FAVORITA
+// --------------------------------------------------
 btnExport.addEventListener('click', () => {
   const favs = loadFavorites();
   const blob = new Blob([JSON.stringify(favs, null, 2)], { type: 'application/json' });
@@ -343,71 +299,6 @@ importFile.addEventListener('change', (e) => {
   };
   reader.readAsText(file);
 });
-
-
-  favs.forEach((f, index) => {
-    const li = document.createElement('li');
-    const t = document.createElement('div');
-    t.className = 'title';
-    t.textContent = f.name || 'Nepoznato';
-
-    const meta = document.createElement('div');
-    meta.className = 'meta';
-    meta.textContent = f.url;
-
-    const actions = document.createElement('div');
-    actions.className = 'item-actions';
-
-    const bPlay = document.createElement('button');
-    bPlay.textContent = 'Play';
-    bPlay.addEventListener('click', () => setStream(f.url, f.name || 'Nepoznato'));
-
-    const bEdit = document.createElement('button');
-    bEdit.textContent = 'Uredi';
-    bEdit.addEventListener('click', () => {
-      const newName = prompt('Unesite novi naziv za ovu stanicu:', f.name || '');
-      if (newName && newName.trim()) {
-        favs[index].name = newName.trim();
-        localStorage.setItem('mojiradio:favs', JSON.stringify(favs));
-        renderFavorites();
-      }
-    });
-
-    const bDel = document.createElement('button');
-    bDel.textContent = 'Ukloni';
-    bDel.addEventListener('click', () => removeFavorite(f.url));
-
-    actions.appendChild(bPlay);
-    actions.appendChild(bEdit);
-    actions.appendChild(bDel);
-
-    li.appendChild(t);
-    li.appendChild(meta);
-    li.appendChild(actions);
-    favListEl.appendChild(li);
-  });
-}
-
-// --------------------------------------------------
-// NOW PLAYING (Smooth 70s)
-// --------------------------------------------------
-async function updateNowPlaying() {
-  const currentUrl = npUrl.textContent.trim();
-  if (currentUrl.includes("s3.voscast.com:9259/default")) {
-    try {
-      const metaUrl = "https://moj-radio.vercel.app/api/proxy?url=" + encodeURIComponent("https://s3.voscast.com:9259/status-json.xsl?mount=/default");
-      const res = await fetch(metaUrl);
-      const data = await res.json();
-      const title = data?.icestats?.source?.title || data?.icestats?.source?.yp_currently_playing || "Nepoznato";
-      nowPlayingEl.textContent = "Now playing: " + title;
-    } catch (e) {
-      nowPlayingEl.textContent = "";
-    }
-  } else {
-    nowPlayingEl.textContent = "";
-  }
-}
-setInterval(updateNowPlaying, 15000);
 
 // --------------------------------------------------
 // RESTORE LAST SESSION
