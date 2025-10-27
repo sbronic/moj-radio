@@ -237,6 +237,39 @@ function renderFavorites() {
     favListEl.innerHTML = '<li>Nema spremljenih favorita.</li>';
     return;
   }
+  // --- NOW PLAYING AUTO-UPDATE ---
+const nowPlayingEl = document.getElementById('nowPlaying');
+
+async function updateNowPlaying() {
+  const streamUrl = npUrl.textContent.trim();
+  if (!streamUrl) return;
+
+  try {
+    // koristi vlastiti proxy kako bi izbjegao CORS
+    const metaUrl = "https://moj-radio.vercel.app/api/proxy?url=" + encodeURIComponent(streamUrl);
+    const res = await fetch(metaUrl, { method: "GET" });
+    const text = await res.text();
+
+    // pokušaj dohvatiti meta info iz Icecast/Shoutcast headersa
+    let match = text.match(/StreamTitle='([^']+)'/i);
+    if (match && match[1]) {
+      nowPlayingEl.textContent = "🎵 Sada svira: " + match[1];
+      return;
+    }
+
+    // ako nema tagova, sakrij poruku
+    nowPlayingEl.textContent = "";
+  } catch (err) {
+    nowPlayingEl.textContent = "";
+  }
+}
+
+// ažuriraj svakih 15 sekundi
+setInterval(updateNowPlaying, 15000);
+
+// ručno pokreni kad se promijeni stream
+audio.addEventListener("play", updateNowPlaying);
+
   favs.forEach(f => {
     const li = document.createElement('li');
     const t = document.createElement('div');
