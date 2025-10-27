@@ -5,7 +5,7 @@ const API_BASES = [
   "https://fr1.api.radio-browser.info",
   "https://nl1.api.radio-browser.info"
 ];
-const CORS_PROXY = "https://corsproxy.io/?";
+const url = "https://moj-radio.vercel.app/api/proxy?url=" + encodeURIComponent(apiUrl);
 
 // Elements
 const audio = document.getElementById('audio');
