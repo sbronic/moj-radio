@@ -3,7 +3,9 @@ const DEFAULT_STREAM = "http://46.20.3.216/"; // Napomena: HTTP stream preko HTT
 const API_BASES = [
   "https://de1.api.radio-browser.info",
   "https://fr1.api.radio-browser.info",
-  "https://nl1.api.radio-browser.info"
+  "https://nl1.api.radio-browser.info",
+  "https://corsproxy.io/?"
+
 ];
 
 const audio = document.getElementById('audio');
