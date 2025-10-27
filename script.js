@@ -92,4 +92,223 @@ function setStream(url, title, stationObj) {
   audio.load();
   updateFavButton(url);
 
-  if
+  if (stationObj) {
+    localStorage.setItem('mojiradio:last', JSON.stringify(stationObj));
+  } else {
+    localStorage.setItem('mojiradio:last', JSON.stringify({ name: title, urlResolved: url }));
+  }
+}
+
+// --------------------------------------------------
+// RADIO-BROWSER SEARCH
+// --------------------------------------------------
+function getApiBase() {
+  const idx = Math.floor(Math.random() * API_BASES.length);
+  return API_BASES[idx];
+}
+
+async function searchStations() {
+  const base = getApiBase();
+  const params = new URLSearchParams();
+  params.set('limit', '50');
+  params.set('hidebroken', 'true');
+  if (qName.value.trim()) params.set('name', qName.value.trim());
+  if (qCountry.value.trim()) params.set('country', qCountry.value.trim());
+  if (qTag.value.trim()) params.set('tag', qTag.value.trim());
+
+  const apiUrl = `${base}/json/stations/search?${params.toString()}`;
+  const url = "https://moj-radio.vercel.app/api/proxy?url=" + encodeURIComponent(apiUrl);
+
+  resultsEl.innerHTML = '<li>Tražim…</li>';
+  try {
+    const res = await fetch(url);
+    const data = await res.json();
+    if (!Array.isArray(data) || data.length === 0) {
+      resultsEl.innerHTML = '<li>Nema rezultata.</li>';
+      return;
+    }
+    renderResults(data);
+  } catch (e) {
+    console.error(e);
+    resultsEl.innerHTML = '<li>Pogreška pri dohvaćanju. Pokušaj ponovno.</li>';
+  }
+}
+
+function renderResults(stations) {
+  resultsEl.innerHTML = '';
+  stations.forEach(st => {
+    const li = document.createElement('li');
+    const title = document.createElement('div');
+    title.className = 'title';
+    title.textContent = st.name || 'Nepoznato';
+
+    const meta = document.createElement('div');
+    meta.className = 'meta';
+    const mCountry = st.country ? `🌍 ${st.country}` : null;
+    const mTags = st.tags ? `🏷️ ${st.tags}` : null;
+    const mCodec = st.codec ? `🎵 ${st.codec} ${st.bitrate ? st.bitrate+'kbps' : ''}` : null;
+    [mCountry, mTags, mCodec].filter(Boolean).forEach(t => {
+      const span = document.createElement('span');
+      span.textContent = t;
+      meta.appendChild(span);
+    });
+
+    const actions = document.createElement('div');
+    actions.className = 'item-actions';
+    const btnPlayItem = document.createElement('button');
+    btnPlayItem.textContent = 'Play';
+    btnPlayItem.addEventListener('click', () => setStream(st.url_resolved || st.url, st.name || 'Nepoznato', { name: st.name, urlResolved: st.url_resolved || st.url }));
+
+    const btnFavItem = document.createElement('button');
+    btnFavItem.textContent = '☆ Spremi';
+    btnFavItem.addEventListener('click', () => saveFavorite({ name: st.name, url: st.url_resolved || st.url }));
+
+    actions.appendChild(btnPlayItem);
+    actions.appendChild(btnFavItem);
+
+    li.appendChild(title);
+    li.appendChild(meta);
+    li.appendChild(actions);
+    resultsEl.appendChild(li);
+  });
+}
+
+// --------------------------------------------------
+// FAVORITES MANAGEMENT
+// --------------------------------------------------
+function loadFavorites() {
+  try {
+    return JSON.parse(localStorage.getItem('mojiradio:favs') || '[]');
+  } catch {
+    return [];
+  }
+}
+
+function saveFavorite(station) {
+  const favs = loadFavorites();
+  if (!favs.find(f => f.url === station.url)) {
+    let customName = prompt("Unesite naziv stanice:", station.name || "Nova stanica");
+    if (!customName) customName = station.name || "Nepoznato";
+    station.name = customName.trim();
+    favs.push(station);
+    localStorage.setItem('mojiradio:favs', JSON.stringify(favs));
+    renderFavorites();
+    updateFavButton(station.url);
+    alert(`Spremljeno kao "${customName}"`);
+  }
+}
+
+function removeFavorite(url) {
+  const favs = loadFavorites().filter(f => f.url !== url);
+  localStorage.setItem('mojiradio:favs', JSON.stringify(favs));
+  renderFavorites();
+  updateFavButton(npUrl.textContent);
+}
+
+function isFavorite(url) {
+  return loadFavorites().some(f => f.url === url);
+}
+
+function updateFavButton(currentUrl) {
+  if (isFavorite(currentUrl)) {
+    btnFav.textContent = '★ U favoritima';
+    btnFav.dataset.state = 'saved';
+  } else {
+    btnFav.textContent = '☆ Spremi';
+    btnFav.dataset.state = 'unsaved';
+  }
+}
+
+function toggleFavorite() {
+  const url = npUrl.textContent;
+  if (!url) return;
+  if (isFavorite(url)) {
+    removeFavorite(url);
+  } else {
+    saveFavorite({ name: npTitle.textContent, url });
+  }
+}
+
+function renderFavorites() {
+  const favs = loadFavorites();
+  favListEl.innerHTML = '';
+  if (favs.length === 0) {
+    favListEl.innerHTML = '<li>Nema spremljenih favorita.</li>';
+    return;
+  }
+
+  favs.forEach((f, index) => {
+    const li = document.createElement('li');
+    const t = document.createElement('div');
+    t.className = 'title';
+    t.textContent = f.name || 'Nepoznato';
+
+    const meta = document.createElement('div');
+    meta.className = 'meta';
+    meta.textContent = f.url;
+
+    const actions = document.createElement('div');
+    actions.className = 'item-actions';
+
+    const bPlay = document.createElement('button');
+    bPlay.textContent = 'Play';
+    bPlay.addEventListener('click', () => setStream(f.url, f.name || 'Nepoznato'));
+
+    const bEdit = document.createElement('button');
+    bEdit.textContent = 'Uredi';
+    bEdit.addEventListener('click', () => {
+      const newName = prompt('Unesite novi naziv za ovu stanicu:', f.name || '');
+      if (newName && newName.trim()) {
+        favs[index].name = newName.trim();
+        localStorage.setItem('mojiradio:favs', JSON.stringify(favs));
+        renderFavorites();
+      }
+    });
+
+    const bDel = document.createElement('button');
+    bDel.textContent = 'Ukloni';
+    bDel.addEventListener('click', () => removeFavorite(f.url));
+
+    actions.appendChild(bPlay);
+    actions.appendChild(bEdit);
+    actions.appendChild(bDel);
+
+    li.appendChild(t);
+    li.appendChild(meta);
+    li.appendChild(actions);
+    favListEl.appendChild(li);
+  });
+}
+
+// --------------------------------------------------
+// NOW PLAYING (Smooth 70s)
+// --------------------------------------------------
+async function updateNowPlaying() {
+  const currentUrl = npUrl.textContent.trim();
+  if (currentUrl.includes("s3.voscast.com:9259/default")) {
+    try {
+      const metaUrl = "https://moj-radio.vercel.app/api/proxy?url=" + encodeURIComponent("https://s3.voscast.com:9259/status-json.xsl?mount=/default");
+      const res = await fetch(metaUrl);
+      const data = await res.json();
+      const title = data?.icestats?.source?.title || data?.icestats?.source?.yp_currently_playing || "Nepoznato";
+      nowPlayingEl.textContent = "Now playing: " + title;
+    } catch (e) {
+      nowPlayingEl.textContent = "";
+    }
+  } else {
+    nowPlayingEl.textContent = "";
+  }
+}
+setInterval(updateNowPlaying, 15000);
+
+// --------------------------------------------------
+// RESTORE LAST SESSION
+// --------------------------------------------------
+(function restoreLast() {
+  try {
+    const last = JSON.parse(localStorage.getItem('mojiradio:last') || 'null');
+    if (last && last.urlResolved) setStream(last.urlResolved, last.name);
+    else if (last && last.url) setStream(last.url, last.name);
+  } catch {}
+  renderFavorites();
+})();
