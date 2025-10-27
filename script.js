@@ -1,6 +1,5 @@
 // Config
-const DEFAULT_STREAM = "https://dygedge.radyotvonline.net/radyovoyage/playlist.m3u8?listenerid=29d0a6a85b59cea2ca801b70d2a3ebaf&awparams=companionAds%3Atrue
-"; // Napomena: HTTP stream preko HTTPS aplikacije može biti blokiran
+const DEFAULT_STREAM = "https://dygedge.radyotvonline.net/radyovoyage/playlist.m3u8?listenerid=29d0a6a85b59cea2ca801b70d2a3ebaf&awparams=companionAds%3Atrue"; // Radio Voyage
 const API_BASES = [
   "https://de1.api.radio-browser.info",
   "https://fr1.api.radio-browser.info",
@@ -8,6 +7,7 @@ const API_BASES = [
 ];
 const CORS_PROXY = "https://corsproxy.io/?";
 
+// Elements
 const audio = document.getElementById('audio');
 const btnPlay = document.getElementById('btnPlay');
 const btnStop = document.getElementById('btnStop');
@@ -53,14 +53,14 @@ btnClearFavs.addEventListener('click', () => {
   }
 });
 
+// --------------------------------------------------
+
 function setStream(url, title, stationObj) {
   audio.src = url;
   npTitle.textContent = title || 'Nepoznato';
   npUrl.textContent = url;
   audio.load();
-  // Ne pokušavamo auto-play zbog browser politika
   updateFavButton(url);
-  // Ako je iz rezultata, cache-aj zadnje
   if (stationObj) {
     localStorage.setItem('mojiradio:last', JSON.stringify(stationObj));
   } else {
@@ -69,38 +69,35 @@ function setStream(url, title, stationObj) {
 }
 
 function getApiBase() {
-  // Jednostavan odabir baze radi redudancije
   const idx = Math.floor(Math.random() * API_BASES.length);
   return API_BASES[idx];
 }
 
 async function searchStations() {
   const base = getApiBase();
-const params = new URLSearchParams();
-params.set('limit', '50');
-params.set('hidebroken', 'true');
-if (qName.value.trim()) params.set('name', qName.value.trim());
-if (qCountry.value.trim()) params.set('country', qCountry.value.trim());
-if (qTag.value.trim()) params.set('tag', qTag.value.trim());
+  const params = new URLSearchParams();
+  params.set('limit', '50');
+  params.set('hidebroken', 'true');
+  if (qName.value.trim()) params.set('name', qName.value.trim());
+  if (qCountry.value.trim()) params.set('country', qCountry.value.trim());
+  if (qTag.value.trim()) params.set('tag', qTag.value.trim());
 
-// KROZ PROXY radi CORS-a
-const apiUrl = `${base}/json/stations/search?${params.toString()}`;
-const url = CORS_PROXY + encodeURIComponent(apiUrl);
+  const apiUrl = `${base}/json/stations/search?${params.toString()}`;
+  const url = CORS_PROXY + encodeURIComponent(apiUrl);
 
-resultsEl.innerHTML = '<li>Tražim…</li>';
-try {
-  const res = await fetch(url);
-  const data = await res.json();
-  if (!Array.isArray(data) || data.length === 0) {
-    resultsEl.innerHTML = '<li>Nema rezultata.</li>';
-    return;
+  resultsEl.innerHTML = '<li>Tražim…</li>';
+  try {
+    const res = await fetch(url);
+    const data = await res.json();
+    if (!Array.isArray(data) || data.length === 0) {
+      resultsEl.innerHTML = '<li>Nema rezultata.</li>';
+      return;
+    }
+    renderResults(data);
+  } catch (e) {
+    console.error(e);
+    resultsEl.innerHTML = '<li>Pogreška pri dohvaćanju. Pokušaj ponovno.</li>';
   }
-  renderResults(data);
-} catch (e) {
-  console.error(e);
-  resultsEl.innerHTML = '<li>Pogreška pri dohvaćanju. Pokušaj ponovno.</li>';
-}
-
 }
 
 function renderResults(stations) {
@@ -200,8 +197,6 @@ function renderFavorites() {
   }
   favs.forEach(f => {
     const li = document.createElement('li');
-    const top = document.createElement('div');
-    top.className = 'item-top';
     const t = document.createElement('div');
     t.className = 'title';
     t.textContent = f.name || 'Nepoznato';
