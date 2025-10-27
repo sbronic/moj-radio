@@ -320,16 +320,36 @@ importFile.addEventListener('change', (e) => {
   renderFavorites();
 })();
 
-// Upute: otvori/zatvori modal
-(function(){
+// --- Upute: otvori / zatvori modal ---
+window.addEventListener("DOMContentLoaded", () => {
   const helpBtn = document.getElementById('helpBtn');
   const helpModal = document.getElementById('helpModal');
   const helpClose = document.getElementById('helpClose');
-  if(!helpBtn || !helpModal || !helpClose) return;
-  const open = ()=>{ helpModal.hidden = false; document.body.style.overflow = 'hidden'; };
-  const close = ()=>{ helpModal.hidden = true; document.body.style.overflow = ''; };
+  if (!helpBtn || !helpModal || !helpClose) return;
+
+  // sigurnosno: sakrij modal na startu
+  helpModal.hidden = true;
+
+  const open = () => {
+    helpModal.hidden = false;
+    document.body.style.overflow = 'hidden';
+  };
+
+  const close = () => {
+    helpModal.hidden = true;
+    document.body.style.overflow = '';
+  };
+
   helpBtn.addEventListener('click', open);
   helpClose.addEventListener('click', close);
-  helpModal.addEventListener('click', (e)=>{ if(e.target === helpModal) close(); });
-  document.addEventListener('keydown', (e)=>{ if(e.key === 'Escape' && !helpModal.hidden) close(); });
-})();
+
+  // klik izvan prozora zatvara modal
+  helpModal.addEventListener('click', (e) => {
+    if (e.target === helpModal) close();
+  });
+
+  // tipka ESC zatvara modal
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && !helpModal.hidden) close();
+  });
+});
