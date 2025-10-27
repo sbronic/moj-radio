@@ -271,6 +271,79 @@ function renderFavorites() {
     favListEl.innerHTML = '<li>Nema spremljenih favorita.</li>';
     return;
   }
+  favs.forEach(f => {
+    const li = document.createElement('li');
+    const t = document.createElement('div');
+    t.className = 'title';
+    t.textContent = f.name || 'Nepoznato';
+    const meta = document.createElement('div');
+    meta.className = 'meta';
+    meta.textContent = f.url;
+
+    const actions = document.createElement('div');
+    actions.className = 'item-actions';
+
+    const bPlay = document.createElement('button');
+    bPlay.textContent = '▶️ Play';
+    bPlay.addEventListener('click', () => setStream(f.url, f.name || 'Nepoznato'));
+
+    const bRename = document.createElement('button');
+    bRename.textContent = '✏️ Preimenuj';
+    bRename.addEventListener('click', () => {
+      const newName = prompt('Unesite novi naziv stanice:', f.name || 'Nepoznato');
+      if (newName) {
+        f.name = newName.trim();
+        localStorage.setItem('mojiradio:favs', JSON.stringify(favs));
+        renderFavorites();
+      }
+    });
+
+    const bDel = document.createElement('button');
+    bDel.textContent = '❌ Ukloni';
+    bDel.addEventListener('click', () => removeFavorite(f.url));
+
+    actions.append(bPlay, bRename, bDel);
+    li.append(t, meta, actions);
+    favListEl.appendChild(li);
+  });
+}
+
+  // === FAVORITE BACKUP / IMPORT / RENAME ===
+const btnExport = document.getElementById('btnExport');
+const btnImport = document.getElementById('btnImport');
+const importFile = document.getElementById('importFile');
+
+btnExport.addEventListener('click', () => {
+  const favs = loadFavorites();
+  const blob = new Blob([JSON.stringify(favs, null, 2)], { type: 'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'mojiradio-favoriti.json';
+  a.click();
+});
+
+btnImport.addEventListener('click', () => importFile.click());
+importFile.addEventListener('change', (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = (ev) => {
+    try {
+      const favs = JSON.parse(ev.target.result);
+      if (Array.isArray(favs)) {
+        localStorage.setItem('mojiradio:favs', JSON.stringify(favs));
+        renderFavorites();
+        alert('Favoriti su uspješno učitani!');
+      } else {
+        alert('Nevažeća datoteka.');
+      }
+    } catch (err) {
+      alert('Greška pri učitavanju datoteke.');
+    }
+  };
+  reader.readAsText(file);
+});
+
 
   favs.forEach((f, index) => {
     const li = document.createElement('li');
