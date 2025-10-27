@@ -319,3 +319,17 @@ importFile.addEventListener('change', (e) => {
   } catch {}
   renderFavorites();
 })();
+
+// Upute: otvori/zatvori modal
+(function(){
+  const helpBtn = document.getElementById('helpBtn');
+  const helpModal = document.getElementById('helpModal');
+  const helpClose = document.getElementById('helpClose');
+  if(!helpBtn || !helpModal || !helpClose) return;
+  const open = ()=>{ helpModal.hidden = false; document.body.style.overflow = 'hidden'; };
+  const close = ()=>{ helpModal.hidden = true; document.body.style.overflow = ''; };
+  helpBtn.addEventListener('click', open);
+  helpClose.addEventListener('click', close);
+  helpModal.addEventListener('click', (e)=>{ if(e.target === helpModal) close(); });
+  document.addEventListener('keydown', (e)=>{ if(e.key === 'Escape' && !helpModal.hidden) close(); });
+})();
