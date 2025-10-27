@@ -27,6 +27,41 @@ const btnSearch = document.getElementById('btnSearch');
 const customUrl = document.getElementById('customUrl');
 const btnLoad = document.getElementById('btnLoad');
 const nowPlayingEl = document.getElementById('nowPlaying');
+const btnExport = document.getElementById('btnExport');
+const btnImport = document.getElementById('btnImport');
+const importFile = document.getElementById('importFile');
+
+btnExport.addEventListener('click', () => {
+  const favs = loadFavorites();
+  const blob = new Blob([JSON.stringify(favs, null, 2)], { type: 'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'mojiradio-favoriti.json';
+  a.click();
+});
+
+btnImport.addEventListener('click', () => importFile.click());
+importFile.addEventListener('change', (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = (ev) => {
+    try {
+      const favs = JSON.parse(ev.target.result);
+      if (Array.isArray(favs)) {
+        localStorage.setItem('mojiradio:favs', JSON.stringify(favs));
+        renderFavorites();
+        alert('Favoriti su uspješno učitani!');
+      } else {
+        alert('Nevažeća datoteka.');
+      }
+    } catch (err) {
+      alert('Greška pri učitavanju datoteke.');
+    }
+  };
+  reader.readAsText(file);
+});
+
 
 // --------------------------------------------------
 // INIT PLAYER
