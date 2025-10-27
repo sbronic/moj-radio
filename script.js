@@ -1,12 +1,12 @@
 // Config
-const DEFAULT_STREAM = "http://46.20.3.216/"; // Napomena: HTTP stream preko HTTPS aplikacije može biti blokiran
+const DEFAULT_STREAM = "https://dygedge.radyotvonline.net/radyovoyage/playlist.m3u8?listenerid=29d0a6a85b59cea2ca801b70d2a3ebaf&awparams=companionAds%3Atrue
+"; // Napomena: HTTP stream preko HTTPS aplikacije može biti blokiran
 const API_BASES = [
   "https://de1.api.radio-browser.info",
   "https://fr1.api.radio-browser.info",
-  "https://nl1.api.radio-browser.info",
-  "https://corsproxy.io/?";
-
+  "https://nl1.api.radio-browser.info"
 ];
+const CORS_PROXY = "https://corsproxy.io/?";
 
 const audio = document.getElementById('audio');
 const btnPlay = document.getElementById('btnPlay');
