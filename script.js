@@ -174,12 +174,17 @@ function loadFavorites() {
 function saveFavorite(station) {
   const favs = loadFavorites();
   if (!favs.find(f => f.url === station.url)) {
+    let customName = prompt("Unesite naziv stanice:", station.name || "Nova stanica");
+    if (!customName) customName = station.name || "Nepoznato";
+    station.name = customName.trim();
     favs.push(station);
     localStorage.setItem('mojiradio:favs', JSON.stringify(favs));
     renderFavorites();
     updateFavButton(station.url);
+    alert(`Spremljeno kao "${customName}"`);
   }
 }
+
 
 function removeFavorite(url) {
   const favs = loadFavorites().filter(f => f.url !== url);
