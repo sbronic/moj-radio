@@ -50,9 +50,12 @@ document.addEventListener('keydown', (e) => {
 });
 
 btnClearFavs.addEventListener('click', () => {
-  if (confirm('Obrisati sve favorite?')) {
-    localStorage.removeItem('mojiradio:favs');
-    renderFavorites();
+  if (confirm('Jeste li sigurni da želite obrisati sve favorite?')) {
+    if (confirm('Stvarno želite obrisati sve favorite? Ova radnja se ne može poništiti.')) {
+      localStorage.removeItem('mojiradio:favs');
+      renderFavorites();
+      alert('Svi favoriti su obrisani.');
+    }
   }
 });
 
