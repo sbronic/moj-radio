@@ -140,3 +140,24 @@ button.danger:hover {
 
 /* Modal: poštuj hidden atribut — MORA BITI IZVAN @media BLOKA */
 .help-modal[hidden]{display:none !important;}
+
+/* --- Now Playing prikaz --- */
+.now-playing-info {
+  text-align: center;
+  font-size: 14px;
+  color: #333;
+  background: #f8f8f8;
+  border: 1px solid #e0e0e0;
+  border-radius: 6px;
+  margin-top: 8px;
+  padding: 6px 10px;
+  min-height: 20px;
+}
+@media (prefers-color-scheme: dark){
+  .now-playing-info {
+    background: #1b1b1b;
+    border-color: #333;
+    color: #ddd;
+  }
+}
+
