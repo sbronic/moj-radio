@@ -27,17 +27,21 @@ const customUrl = document.getElementById('customUrl');
 const btnLoad = document.getElementById('btnLoad');
 
 // Init player
-setStream(DEFAULT_STREAM, "Zadani stream");
-
-btnPlay.addEventListener('click', () => { audio.play().catch(console.warn); });
-btnStop.addEventListener('click', () => { audio.pause(); audio.currentTime = 0; });
-btnFav.addEventListener('click', toggleFavorite);
-
-btnLoad.addEventListener('click', () => {
-  const url = customUrl.value.trim();
-  if (!url) return;
-  setStream(url, "Prilagođeni stream");
+// Init player
+window.addEventListener("load", () => {
+  // čekamo da se hls.js učita
+  const start = () => setStream(DEFAULT_STREAM, "Zadani stream");
+  if (window.Hls) start();
+  else {
+    const iv = setInterval(() => {
+      if (window.Hls) {
+        clearInterval(iv);
+        start();
+      }
+    }, 200);
+  }
 });
+
 
 btnSearch.addEventListener('click', searchStations);
 document.addEventListener('keydown', (e) => {
