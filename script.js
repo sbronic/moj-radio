@@ -1,6 +1,7 @@
 // --------------------------------------------------
 // CONFIG
 // --------------------------------------------------
+
 // === Proxy postavke ===
 const PROXY_BASE = "https://radio-proxy-4w2d.onrender.com/stream?url=";
 
@@ -8,14 +9,13 @@ const PROXY_BASE = "https://radio-proxy-4w2d.onrender.com/stream?url=";
 function proxify(url) {
   if (!url) return url;
   if (url.startsWith(PROXY_BASE)) return url; // već ima proxy
-  // ako nije HTTPS i nije s tvoje domene – ide kroz proxy
   if (url.startsWith("http://") || url.includes("radio-browser.info")) {
     return PROXY_BASE + encodeURIComponent(url);
   }
   return url;
 }
 
-const DEFAULT_STREAM = "https://moj-radio.vercel.app/api/proxy?url=https://dygedge.radyotvonline.net/radyovoyage/playlist.m3u8";
+const DEFAULT_STREAM = "https://radio-proxy-4w2d.onrender.com/stream?url=https://dygedge.radyotvonline.net/radyovoyage/playlist.m3u8";
 const API_BASES = [
   "https://de1.api.radio-browser.info",
   "https://fr1.api.radio-browser.info",
@@ -43,6 +43,7 @@ const btnLoad = document.getElementById('btnLoad');
 const btnExport = document.getElementById('btnExport');
 const btnImport = document.getElementById('btnImport');
 const importFile = document.getElementById('importFile');
+const nowPlayingEl = document.getElementById('nowPlaying');
 
 // --------------------------------------------------
 // INIT PLAYER
@@ -86,27 +87,19 @@ btnClearFavs.addEventListener('click', () => {
 // PLAYER FUNCTIONS
 // --------------------------------------------------
 function setStream(url, title, stationObj) {
-  url = proxify(url); // <--- dodano
+  url = proxify(url);
   npTitle.textContent = title || 'Nepoznato';
   npUrl.textContent = url;
 
-
-  // Ako URL nije već proxy, omotaj ga
-  let streamUrl = url;
-  if (!url.startsWith("https://moj-radio.vercel.app/api/proxy?")) {
-    streamUrl = "https://moj-radio.vercel.app/api/proxy?url=" + encodeURIComponent(url);
-  }
-
-  // HLS ili obični stream
   if (audio.canPlayType('application/vnd.apple.mpegurl')) {
-    audio.src = streamUrl;
+    audio.src = url;
   } else if (window.Hls && Hls.isSupported()) {
     if (window.hls) window.hls.destroy();
     window.hls = new Hls();
-    window.hls.loadSource(streamUrl);
+    window.hls.loadSource(url);
     window.hls.attachMedia(audio);
   } else {
-    audio.src = streamUrl;
+    audio.src = url;
   }
 
   audio.load();
@@ -117,8 +110,9 @@ function setStream(url, title, stationObj) {
   } else {
     localStorage.setItem('mojiradio:last', JSON.stringify({ name: title, urlResolved: url }));
   }
-}
 
+  updateNowPlaying(); // pokreni odmah kad promijeniš stanicu
+}
 
 // --------------------------------------------------
 // RADIO-BROWSER SEARCH
@@ -138,7 +132,7 @@ async function searchStations() {
   if (qTag.value.trim()) params.set('tag', qTag.value.trim());
 
   const apiUrl = `${base}/json/stations/search?${params.toString()}`;
-  const url = "https://moj-radio.vercel.app/api/proxy?url=" + encodeURIComponent(apiUrl);
+  const url = proxify(apiUrl);
 
   resultsEl.innerHTML = '<li>Tražim…</li>';
   try {
@@ -253,38 +247,6 @@ function renderFavorites() {
     favListEl.innerHTML = '<li>Nema spremljenih favorita.</li>';
     return;
   }
-  // --- NOW PLAYING AUTO-UPDATE ---
-const nowPlayingEl = document.getElementById('nowPlaying');
-
-async function updateNowPlaying() {
-  const streamUrl = npUrl.textContent.trim();
-  if (!streamUrl) return;
-
-  try {
-    // koristi vlastiti proxy kako bi izbjegao CORS
-    const metaUrl = "https://moj-radio.vercel.app/api/proxy?url=" + encodeURIComponent(streamUrl);
-    const res = await fetch(metaUrl, { method: "GET" });
-    const text = await res.text();
-
-    // pokušaj dohvatiti meta info iz Icecast/Shoutcast headersa
-    let match = text.match(/StreamTitle='([^']+)'/i);
-    if (match && match[1]) {
-      nowPlayingEl.textContent = "🎵 Sada svira: " + match[1];
-      return;
-    }
-
-    // ako nema tagova, sakrij poruku
-    nowPlayingEl.textContent = "";
-  } catch (err) {
-    nowPlayingEl.textContent = "";
-  }
-}
-
-// ažuriraj svakih 15 sekundi
-setInterval(updateNowPlaying, 15000);
-
-// ručno pokreni kad se promijeni stream
-audio.addEventListener("play", updateNowPlaying);
 
   favs.forEach(f => {
     const li = document.createElement('li');
@@ -324,6 +286,32 @@ audio.addEventListener("play", updateNowPlaying);
 }
 
 // --------------------------------------------------
+// NOW PLAYING AUTO-UPDATE
+// --------------------------------------------------
+async function updateNowPlaying() {
+  const streamUrl = npUrl.textContent.trim();
+  if (!streamUrl) return;
+
+  try {
+    const metaUrl = proxify(streamUrl);
+    const res = await fetch(metaUrl, { method: "GET" });
+    const text = await res.text();
+
+    let match = text.match(/StreamTitle='([^']+)'/i);
+    if (match && match[1]) {
+      nowPlayingEl.textContent = "🎵 Sada svira: " + match[1];
+      return;
+    }
+    nowPlayingEl.textContent = "";
+  } catch {
+    nowPlayingEl.textContent = "";
+  }
+}
+
+setInterval(updateNowPlaying, 15000);
+audio.addEventListener("play", updateNowPlaying);
+
+// --------------------------------------------------
 // BACKUP / IMPORT FAVORITA
 // --------------------------------------------------
 btnExport.addEventListener('click', () => {
@@ -350,7 +338,7 @@ importFile.addEventListener('change', (e) => {
       } else {
         alert('Nevažeća datoteka.');
       }
-    } catch (err) {
+    } catch {
       alert('Greška pri učitavanju datoteke.');
     }
   };
@@ -369,17 +357,19 @@ importFile.addEventListener('change', (e) => {
   renderFavorites();
 })();
 
-// --- Upute: otvori / zatvori modal ---
+// --------------------------------------------------
+// UPUTE MODAL (otvori/zatvori)
+// --------------------------------------------------
 window.addEventListener("DOMContentLoaded", () => {
   const helpBtn = document.getElementById('helpBtn');
   const helpModal = document.getElementById('helpModal');
   const helpClose = document.getElementById('helpClose');
   if (!helpBtn || !helpModal || !helpClose) return;
 
-  helpModal.setAttribute('hidden',''); // sigurno sakrij modal na startu
+  helpModal.setAttribute('hidden', '');
 
-  const open = () => { helpModal.removeAttribute('hidden'); document.body.style.overflow='hidden'; };
-  const close = () => { helpModal.setAttribute('hidden',''); document.body.style.overflow=''; };
+  const open = () => { helpModal.removeAttribute('hidden'); document.body.style.overflow = 'hidden'; };
+  const close = () => { helpModal.setAttribute('hidden', ''); document.body.style.overflow = ''; };
 
   helpBtn.addEventListener('click', open);
   helpClose.addEventListener('click', close);
