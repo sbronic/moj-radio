@@ -1,6 +1,20 @@
 // --------------------------------------------------
 // CONFIG
 // --------------------------------------------------
+// === Proxy postavke ===
+const PROXY_BASE = "https://radio-proxy-4w2d.onrender.com/stream?url=";
+
+// Funkcija koja automatski dodaje proxy ako treba
+function proxify(url) {
+  if (!url) return url;
+  if (url.startsWith(PROXY_BASE)) return url; // već ima proxy
+  // ako nije HTTPS i nije s tvoje domene – ide kroz proxy
+  if (url.startsWith("http://") || url.includes("radio-browser.info")) {
+    return PROXY_BASE + encodeURIComponent(url);
+  }
+  return url;
+}
+
 const DEFAULT_STREAM = "https://moj-radio.vercel.app/api/proxy?url=https://dygedge.radyotvonline.net/radyovoyage/playlist.m3u8";
 const API_BASES = [
   "https://de1.api.radio-browser.info",
