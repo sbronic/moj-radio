@@ -86,8 +86,10 @@ btnClearFavs.addEventListener('click', () => {
 // PLAYER FUNCTIONS
 // --------------------------------------------------
 function setStream(url, title, stationObj) {
+  url = proxify(url); // <--- dodano
   npTitle.textContent = title || 'Nepoznato';
   npUrl.textContent = url;
+
 
   // Ako URL nije već proxy, omotaj ga
   let streamUrl = url;
